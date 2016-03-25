@@ -189,7 +189,7 @@ public class RecursiveList<T> implements ListInterface<T> {
 	}
 
 	// used for getting node at an index
-	public DLNode<T> CountHelper(DLNode current, int countdown) {
+	public DLNode<T> CountHelper(DLNode<T> current, int countdown) {
 		if (countdown == 0) {
 			return current;
 		}
