@@ -20,9 +20,11 @@ public class RecursiveList<T> implements ListInterface<T> {
 	}
 
 	@Override
-	public ListInterface<T> insertFirst(T elem) {
+	public ListInterface<T> insertFirst(T elem) throws NullPointerException {
 		// TODO Auto-generated method stub
-
+		if (elem == null){
+			throw new NullPointerException();
+		}
 		setHead(new DLNode<T>(elem, head, null));
 		if (getHead().getNext() == null) // this is the only element
 			setTail(getHead());
@@ -35,7 +37,9 @@ public class RecursiveList<T> implements ListInterface<T> {
 	@Override
 	public ListInterface<T> insertLast(T elem) {
 		// TODO Auto-generated method stub
-
+		if (elem == null){
+			throw new NullPointerException();
+		}
 		setTail(new DLNode<T>(elem, null, tail));
 		if (getTail().getPrev() == null) {
 			setHead(getTail());
@@ -48,24 +52,27 @@ public class RecursiveList<T> implements ListInterface<T> {
 	}
 
 	@Override
-	public ListInterface<T> insertAt(int index, T elem) throws IndexOutOfBoundsException {
+	public ListInterface<T> insertAt(int index, T elem) throws IndexOutOfBoundsException  {
 		// TODO Auto-generated method stub
-		if (index < 0 || index >= size) {
+		if (index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
 		}
 		if (index == 0) {
 			insertFirst(elem);
 			return this;
 		}
-		if (index == (size - 1)) {
+
+
+		if (index == size) {
 			insertLast(elem);
 			return this;
 		}
-		DLNode<T> tempPrev = CountHelper(head, index);
-		DLNode<T> tempNext = tempPrev.getNext();
+		DLNode<T> tempNext = CountHelper(head, index);
+		DLNode<T> tempPrev = tempNext.getPrev();
 		DLNode<T> toInsert = new DLNode<T>(elem, tempNext, tempPrev);
 		tempNext.setPrev(toInsert);
 		tempPrev.setNext(toInsert);
+		size++;
 		return this;
 	}
 
@@ -86,41 +93,64 @@ public class RecursiveList<T> implements ListInterface<T> {
 
 	@Override
 	public T removeLast() throws IllegalStateException {
-		// TODO Auto-generated method stub
 		if (isEmpty())
 			throw new IllegalStateException();
-		T data = tail.getData();
-		if (tail.getPrev() != null)
-			tail.getPrev().setNext(null);
-		else
-			head = null;
-		tail = tail.getPrev();
-		size--;
-		return data;
-	}
-
-	@Override
-	public T removeAt(int i) {
 		// TODO Auto-generated method stub
-		return null;
+		return removeAt(size - 1);
 	}
 
 	@Override
-	public T getFirst() {
+	public T removeAt(int i) throws IllegalStateException {
+		// TODO Auto-generated method stub
+		if (isEmpty() || i < 0 || i > size)
+			throw new IllegalStateException();
+		DLNode<T> toRemove = CountHelper(head, i);
+		T rval = toRemove.getData();
+
+		if (toRemove.getPrev() != null && toRemove.getNext() != null) {
+			DLNode<T> tempPrev = toRemove.getPrev();
+			DLNode<T> tempNext = toRemove.getNext();
+			tempPrev.setNext(tempNext);
+			tempNext.setPrev(tempPrev);
+			size--;
+		} else if (toRemove.getPrev() == null) {
+			removeFirst();
+		} else if (toRemove.getNext() == null) {
+			if (isEmpty())
+				throw new IllegalStateException();
+			if (tail.getPrev() != null)
+				tail.getPrev().setNext(null);
+			else
+				head = null;
+			tail = tail.getPrev();
+			size--;
+		}
+
+		return rval;
+	}
+
+	@Override
+	public T getFirst() throws IllegalStateException{
+		if (isEmpty())
+			throw new IllegalStateException();
 		// TODO Auto-generated method stub
 		return head.getData();
 	}
 
 	@Override
-	public T getLast() {
+	public T getLast() throws IllegalStateException{
 		// TODO Auto-generated method stub
+		if (isEmpty())
+			throw new IllegalStateException();
 		return tail.getData();
 	}
 
 	@Override
-	public T get(int i) {
+	public T get(int i) throws IndexOutOfBoundsException {
 		// TODO Auto-generated method stub
-		DLNode<T> temp = CountHelper(head,i);
+		if (i > size)
+			throw new IndexOutOfBoundsException();
+		DLNode<T> temp = CountHelper(head, i);
 		return temp.getData();
 	}
 
@@ -129,15 +159,11 @@ public class RecursiveList<T> implements ListInterface<T> {
 		// TODO Auto-generated method stub
 		if (elem == null)
 			throw new NullPointerException();
-		int index = indexHelper(elem,head,0);
-		if (index == -1){
+		int index = indexHelper(elem, head, 0);
+		if (index == -1) {
 			return false;
 		}
-		DLNode<T> temp = CountHelper(head,index);
-		DLNode<T> tempPrev = temp.getPrev();
-		DLNode<T> tempNext = temp.getNext();
-		tempNext.setPrev(tempPrev);
-		tempPrev.setNext(tempNext);
+		removeAt(index);
 		// remove by setting next and prev nodes appropriate pointers
 		return true;
 	}
